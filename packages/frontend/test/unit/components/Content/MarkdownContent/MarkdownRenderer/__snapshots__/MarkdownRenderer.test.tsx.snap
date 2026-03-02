@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MarkdownRenderer > renders markdown content correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="markdown-body MuiBox-root css-1yyviwt"
+  >
+    <div
+      data-testid="mock-react-markdown-root"
+    >
+      <h1
+        data-testid="mock-h1"
+        id="hello-world"
+        node="[object Object]"
+      >
+        Hello World
+      </h1>
+      
+
+      <p
+        data-testid="mock-p"
+        node="[object Object]"
+      >
+        This is a paragraph.
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;

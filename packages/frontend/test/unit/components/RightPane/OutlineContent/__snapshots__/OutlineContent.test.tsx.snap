@@ -1,0 +1,52 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OutlineContent > renders outline items correctly 1`] = `
+<DocumentFragment>
+  <ul
+    class="MuiList-root MuiList-padding MuiList-dense custom-scrollbar css-1ocenw0-MuiList-root"
+  >
+    <li
+      class="MuiListItem-root MuiListItem-dense MuiListItem-gutters MuiListItem-padding css-1s7t0kb-MuiListItem-root"
+    >
+      <div
+        class="MuiListItemText-root MuiListItemText-dense css-6qv7tz-MuiListItemText-root"
+        title="Heading 1"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 MuiListItemText-primary css-7ctihp-MuiTypography-root"
+        >
+          Heading 1
+        </span>
+      </div>
+    </li>
+    <li
+      class="MuiListItem-root MuiListItem-dense MuiListItem-gutters MuiListItem-padding css-1bz6dlg-MuiListItem-root"
+    >
+      <div
+        class="MuiListItemText-root MuiListItemText-dense css-6qv7tz-MuiListItemText-root"
+        title="Subheading 1"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 MuiListItemText-primary css-7ctihp-MuiTypography-root"
+        >
+          Subheading 1
+        </span>
+      </div>
+    </li>
+    <li
+      class="MuiListItem-root MuiListItem-dense MuiListItem-gutters MuiListItem-padding css-1s7t0kb-MuiListItem-root"
+    >
+      <div
+        class="MuiListItemText-root MuiListItemText-dense css-6qv7tz-MuiListItemText-root"
+        title="Heading 2"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 MuiListItemText-primary css-7ctihp-MuiTypography-root"
+        >
+          Heading 2
+        </span>
+      </div>
+    </li>
+  </ul>
+</DocumentFragment>
+`;

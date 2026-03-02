@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OutlineListItem > should render correctly 1`] = `
+<DocumentFragment>
+  <li
+    class="MuiListItem-root MuiListItem-gutters MuiListItem-padding css-66b8d4-MuiListItem-root"
+  >
+    <div
+      class="MuiListItemText-root css-6qv7tz-MuiListItemText-root"
+      title="Heading 1"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-rizt0-MuiTypography-root"
+      >
+        Heading 1
+      </span>
+    </div>
+  </li>
+</DocumentFragment>
+`;

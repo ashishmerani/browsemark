@@ -1,0 +1,83 @@
+{
+  "name": "browsemark",
+  "version": "0.1.0",
+  "packageManager": "npm@10.9.4",
+  "description": "Browse and annotate your codebase docs in the browser. Annotations flow to AI coding agents via MCP. Zero config.",
+  "main": "dist/index.js",
+  "bin": {
+    "browsemark": "./bin/browsemark"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && rm -rf dist/server/public && cp -R public/. dist/server/public",
+    "build:frontend": "cd packages/frontend && npm run build",
+    "prepublishOnly": "npm run build && npm run build:frontend && npm test && npm run test:frontend",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:frontend": "cd packages/frontend && npm test",
+    "lint": "eslint src/ test/",
+    "lint:frontend": "cd packages/frontend && npx eslint src/ test/",
+    "start": "npm run build && npm run build:frontend && node dist/index.js",
+    "dev": "npm run build && npm run build:frontend && tsc --watch --preserveWatchOutput & cd packages/frontend && npm run build -- --watch & node dist/index.js",
+    "prepare": "husky",
+    "check": "npm run lint && npm run lint:frontend && npm run build && npm test && npm run test:frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashishmerani/browsemark.git"
+  },
+  "keywords": [
+    "markdown",
+    "markdown-viewer",
+    "documentation",
+    "docs-as-code",
+    "wiki-links",
+    "mermaid",
+    "spec-driven",
+    "prd",
+    "cli",
+    "live-reload",
+    "viewer"
+  ],
+  "author": "ashishmerani",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bugs": {
+    "url": "https://github.com/ashishmerani/browsemark/issues"
+  },
+  "homepage": "https://github.com/ashishmerani/browsemark#readme",
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.7.1",
+    "@types/express": "^5.0.3",
+    "@types/markdown-it": "^14.1.2",
+    "@types/supertest": "^6.0.3",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.56.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "axios": "^1.10.0",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "supertest": "^7.1.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.56.0",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "agentation-mcp": "^1.2.0",
+    "chalk": "^5.4.1",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.0",
+    "express": "^5.1.0",
+    "github-slugger": "^2.0.0",
+    "markdown-it": "^14.1.0",
+    "node-plantuml-back": "^1.1.4",
+    "open": "^11.0.0",
+    "simple-git": "^3.28.0",
+    "ws": "^8.18.3"
+  }
+}

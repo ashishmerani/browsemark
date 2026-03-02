@@ -1,0 +1,36 @@
+# IDE / editor configs
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+/out/
+
+# Editor temp/backup files
+*~
+\#*\#
+.\#*
+
+# Node
+logs
+*.log
+pids
+*.pid
+*.seed
+node_modules
+build/Release
+coverage
+
+# OS / environment
+.DS_Store
+.envrc
+.claude
+
+# Secrets / credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Build output (rebuild with: npm run build && npm run build:frontend)
+dist/

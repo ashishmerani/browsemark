@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Outline > renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="MuiBox-root css-caz73p"
+  >
+    <div
+      class="MuiBox-root css-mzwsmu"
+    >
+      <button
+        aria-label="toggle outline"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1nyqon6-MuiButtonBase-root-MuiIconButton-root"
+        tabindex="0"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+          data-testid="ChevronRightIcon"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+          />
+        </svg>
+      </button>
+      <h6
+        class="MuiTypography-root MuiTypography-h6 MuiTypography-gutterBottom css-ti0skg-MuiTypography-root"
+      >
+        Outline
+      </h6>
+    </div>
+    <ul
+      class="MuiList-root MuiList-padding MuiList-dense custom-scrollbar css-1ocenw0-MuiList-root"
+    >
+      <li
+        class="MuiListItem-root MuiListItem-dense MuiListItem-gutters MuiListItem-padding css-1s7t0kb-MuiListItem-root"
+      >
+        <div
+          class="MuiListItemText-root MuiListItemText-dense css-6qv7tz-MuiListItemText-root"
+          title="Title"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 MuiListItemText-primary css-7ctihp-MuiTypography-root"
+          >
+            Title
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</DocumentFragment>
+`;

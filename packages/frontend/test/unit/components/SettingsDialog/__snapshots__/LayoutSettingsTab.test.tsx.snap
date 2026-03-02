@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LayoutSettingsTab > should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="MuiBox-root css-19midj6"
+  >
+    <h6
+      class="MuiTypography-root MuiTypography-subtitle2 css-b264gj-MuiTypography-root"
+    >
+      Content Width
+    </h6>
+    <div
+      aria-label="content width"
+      class="MuiToggleButtonGroup-root MuiToggleButtonGroup-horizontal MuiToggleButtonGroup-fullWidth css-1jjbo4h-MuiToggleButtonGroup-root"
+      role="group"
+    >
+      <button
+        aria-label="full"
+        aria-pressed="false"
+        class="MuiButtonBase-root MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButton-root MuiToggleButton-fullWidth MuiToggleButton-sizeSmall MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButtonGroup-firstButton css-blggev-MuiButtonBase-root-MuiToggleButton-root"
+        tabindex="0"
+        type="button"
+        value="full"
+      >
+        Full
+      </button>
+      <button
+        aria-label="compact"
+        aria-pressed="false"
+        class="MuiButtonBase-root MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButton-root MuiToggleButton-fullWidth MuiToggleButton-sizeSmall MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButtonGroup-lastButton css-blggev-MuiButtonBase-root-MuiToggleButton-root"
+        tabindex="0"
+        type="button"
+        value="compact"
+      >
+        Compact
+      </button>
+    </div>
+  </div>
+</DocumentFragment>
+`;

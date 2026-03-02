@@ -1,0 +1,108 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BreadCrumb > renders breadcrumbs for a directory path 1`] = `
+<DocumentFragment>
+  <nav
+    aria-label="breadcrumb"
+    class="MuiTypography-root MuiTypography-body1 MuiBreadcrumbs-root css-12nhdmn-MuiTypography-root-MuiBreadcrumbs-root"
+  >
+    <ol
+      class="MuiBreadcrumbs-ol css-1uwp4ue-MuiBreadcrumbs-ol"
+    >
+      <li
+        class="MuiBreadcrumbs-li"
+      >
+        <a
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-drt9hv-MuiTypography-root-MuiLink-root"
+          href="#"
+        >
+          folder1
+        </a>
+      </li>
+      <li
+        aria-hidden="true"
+        class="MuiBreadcrumbs-separator css-jhr02i-MuiBreadcrumbs-separator"
+      >
+        /
+      </li>
+      <li
+        class="MuiBreadcrumbs-li"
+      >
+        <p
+          class="MuiTypography-root MuiTypography-body1 css-4leci6-MuiTypography-root"
+        >
+          subfolder
+        </p>
+      </li>
+    </ol>
+  </nav>
+</DocumentFragment>
+`;
+
+exports[`BreadCrumb > renders breadcrumbs for a file path 1`] = `
+<DocumentFragment>
+  <nav
+    aria-label="breadcrumb"
+    class="MuiTypography-root MuiTypography-body1 MuiBreadcrumbs-root css-12nhdmn-MuiTypography-root-MuiBreadcrumbs-root"
+  >
+    <ol
+      class="MuiBreadcrumbs-ol css-1uwp4ue-MuiBreadcrumbs-ol"
+    >
+      <li
+        class="MuiBreadcrumbs-li"
+      >
+        <a
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-drt9hv-MuiTypography-root-MuiLink-root"
+          href="#"
+        >
+          folder1
+        </a>
+      </li>
+      <li
+        aria-hidden="true"
+        class="MuiBreadcrumbs-separator css-jhr02i-MuiBreadcrumbs-separator"
+      >
+        /
+      </li>
+      <li
+        class="MuiBreadcrumbs-li"
+      >
+        <a
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-drt9hv-MuiTypography-root-MuiLink-root"
+          href="#"
+        >
+          subfolder
+        </a>
+      </li>
+      <li
+        aria-hidden="true"
+        class="MuiBreadcrumbs-separator css-jhr02i-MuiBreadcrumbs-separator"
+      >
+        /
+      </li>
+      <li
+        class="MuiBreadcrumbs-li"
+      >
+        <p
+          class="MuiTypography-root MuiTypography-body1 css-4leci6-MuiTypography-root"
+        >
+          file.md
+        </p>
+      </li>
+    </ol>
+  </nav>
+</DocumentFragment>
+`;
+
+exports[`BreadCrumb > renders nothing when currentPath is empty 1`] = `
+<DocumentFragment>
+  <nav
+    aria-label="breadcrumb"
+    class="MuiTypography-root MuiTypography-body1 MuiBreadcrumbs-root css-12nhdmn-MuiTypography-root-MuiBreadcrumbs-root"
+  >
+    <ol
+      class="MuiBreadcrumbs-ol css-1uwp4ue-MuiBreadcrumbs-ol"
+    />
+  </nav>
+</DocumentFragment>
+`;

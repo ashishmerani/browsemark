@@ -1,0 +1,105 @@
+import { useTheme } from '@mui/material';
+import {
+  a11yDark,
+  atomDark,
+  base16AteliersulphurpoolLight,
+  cb,
+  coldarkCold,
+  coldarkDark,
+  coy,
+  coyWithoutShadows,
+  darcula,
+  dark,
+  dracula,
+  duotoneDark,
+  duotoneEarth,
+  duotoneForest,
+  duotoneLight,
+  duotoneSea,
+  duotoneSpace,
+  funky,
+  ghcolors,
+  gruvboxDark,
+  gruvboxLight,
+  hopscotch,
+  lucario,
+  materialDark,
+  materialLight,
+  materialOceanic,
+  nightOwl,
+  nord,
+  okaidia,
+  oneDark,
+  oneLight,
+  pojoaque,
+  prism,
+  shadesOfPurple,
+  solarizedDarkAtom,
+  solarizedlight,
+  synthwave84,
+  tomorrow,
+  twilight,
+  vs,
+  vscDarkPlus,
+  xonokai,
+  zTouch
+} from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+export const useSyntaxHighlighterTheme = (syntaxHighlighterTheme: string): object => {
+  const theme = useTheme();
+
+  const themeMap: { [key: string]: object } = {
+    coy,
+    dark,
+    funky,
+    okaidia,
+    solarizedlight,
+    tomorrow,
+    twilight,
+    prism,
+    nightOwl,
+    atomDark,
+    darcula,
+    dracula,
+    ghcolors,
+    vs,
+    vscDarkPlus,
+    a11yDark,
+    base16AteliersulphurpoolLight,
+    cb,
+    coldarkCold,
+    coldarkDark,
+    coyWithoutShadows,
+    duotoneDark,
+    duotoneEarth,
+    duotoneForest,
+    duotoneLight,
+    duotoneSea,
+    duotoneSpace,
+    gruvboxDark,
+    gruvboxLight,
+    hopscotch,
+    lucario,
+    materialDark,
+    materialLight,
+    materialOceanic,
+    nord,
+    oneDark,
+    oneLight,
+    pojoaque,
+    shadesOfPurple,
+    solarizedDarkAtom,
+    synthwave84,
+    xonokai,
+    zTouch,
+  };
+
+  const getSyntaxHighlighterTheme = () => {
+    if (syntaxHighlighterTheme === 'auto') {
+      return theme.palette.mode === 'dark' ? atomDark : vs;
+    }
+    return themeMap[syntaxHighlighterTheme] || atomDark;
+  };
+
+  return getSyntaxHighlighterTheme();
+};
