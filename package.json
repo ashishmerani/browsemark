@@ -29,17 +29,12 @@
     "url": "git+https://github.com/ashishmerani/browsemark.git"
   },
   "keywords": [
-    "markdown",
-    "markdown-viewer",
-    "documentation",
-    "docs-as-code",
-    "wiki-links",
-    "mermaid",
-    "spec-driven",
-    "prd",
-    "cli",
-    "live-reload",
-    "viewer"
+    "ai-tools",
+    "claude-code",
+    "developer-tools",
+    "markdown-annotation",
+    "model-context-protocol",
+    "obsidian"
   ],
   "author": "ashishmerani",
   "license": "MIT",
