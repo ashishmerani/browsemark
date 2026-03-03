@@ -1,6 +1,6 @@
 {
   "name": "browsemark",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "packageManager": "npm@10.9.4",
   "description": "Browse and annotate your codebase docs in the browser. Annotations flow to AI coding agents via MCP. Zero config.",
   "main": "dist/index.js",
