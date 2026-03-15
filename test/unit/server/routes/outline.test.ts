@@ -11,7 +11,7 @@ vi.mock('fs', async () => {
   return {
     __esModule: true,
     ...originalModule,
-    existsSync: vi.fn(),
+    realpathSync: vi.fn(),
     readFileSync: vi.fn(),
   };
 });
@@ -32,8 +32,8 @@ describe('outline.ts', () => {
   beforeEach(() => {
     const mockedFs = fs as Mocked<typeof import('fs')>;
     mockedFs.readFileSync.mockReset();
-    mockedFs.existsSync.mockReset();
-    mockedFs.existsSync.mockReturnValue(true);
+    mockedFs.realpathSync.mockReset();
+    mockedFs.realpathSync.mockImplementation(filePath => String(filePath));
     (MarkdownIt as Mock).mockClear();
   });
 
@@ -91,12 +91,46 @@ describe('outline.ts', () => {
       expect(response.text).toBe('Forbidden');
     });
 
+    it('should allow valid files when mounted at filesystem root', async () => {
+      const rootApp = express();
+      const rootDirectory = path.parse(process.cwd()).root;
+      const mockedFs = fs as Mocked<typeof import('fs')>;
+      mockedFs.readFileSync.mockReturnValueOnce('# Root Heading');
+      rootApp.use('/api/outline', outlineRouter(rootDirectory));
+
+      const response = await request(rootApp).get('/api/outline?filePath=test.md');
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toEqual([
+        { level: 1, content: 'Root Heading', id: 'root-heading' },
+      ]);
+    });
+
+    it('should return 403 when a symlink resolves outside the mounted directory', async () => {
+      const mockedFs = fs as Mocked<typeof import('fs')>;
+      mockedFs.realpathSync.mockImplementation(filePath => {
+        if (String(filePath).endsWith('symlink.md')) {
+          return '/etc/passwd';
+        }
+        return String(filePath);
+      });
+
+      const response = await request(app).get('/api/outline?filePath=symlink.md');
+
+      expect(response.statusCode).toBe(403);
+      expect(response.text).toBe('Forbidden');
+    });
+
     it('should return 200 if file does not exist', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const mockedFs = fs as Mocked<typeof import('fs')>;
-      mockedFs.existsSync.mockReturnValueOnce(false);
-      mockedFs.readFileSync.mockImplementationOnce(() => {
-        throw new Error('File not found');
+      mockedFs.realpathSync.mockImplementation(filePath => {
+        if (String(filePath).endsWith('nonexistent.md')) {
+          const error = new Error('File not found') as NodeJS.ErrnoException;
+          error.code = 'ENOENT';
+          throw error;
+        }
+        return String(filePath);
       });
       const response = await request(app).get('/api/outline?filePath=nonexistent.md');
 

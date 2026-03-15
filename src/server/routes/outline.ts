@@ -12,6 +12,18 @@ interface OutlineItem {
   id: string;
 }
 
+const getPathPrefix = (rootPath: string): string =>
+  rootPath.endsWith(path.sep) ? rootPath : `${rootPath}${path.sep}`;
+
+const isPathWithinRoot = (targetPath: string, rootPath: string): boolean =>
+  targetPath === rootPath || targetPath.startsWith(getPathPrefix(rootPath));
+
+const isMissingFileError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  error.code === 'ENOENT';
+
 export const outlineRouter = (directory: string): Router => {
   const router = Router();
 
@@ -25,20 +37,31 @@ export const outlineRouter = (directory: string): Router => {
       if (filePath === 'browsemark-welcome.md') {
         absolutePath = path.join(__dirname, '../public/welcome.md');
       } else {
+        const resolvedRoot = fs.realpathSync(directory);
         const decodedPath = decodeURIComponent(filePath);
         const normalizedPath = path.normalize(decodedPath);
-        absolutePath = path.resolve(directory, normalizedPath);
-        const resolvedRoot = path.resolve(directory) + path.sep;
+        const resolvedPath = path.resolve(resolvedRoot, normalizedPath);
 
-        if (!absolutePath.startsWith(resolvedRoot)) {
+        if (!isPathWithinRoot(resolvedPath, resolvedRoot)) {
+          logger.error(`🚫 Attempted path traversal on outline: ${resolvedPath}`);
+          return res.status(403).send('Forbidden');
+        }
+
+        try {
+          absolutePath = fs.realpathSync(resolvedPath);
+        } catch (error) {
+          if (isMissingFileError(error)) {
+            return res.json([]);
+          }
+          throw error;
+        }
+
+        if (!isPathWithinRoot(absolutePath, resolvedRoot)) {
           logger.error(`🚫 Attempted path traversal on outline: ${absolutePath}`);
           return res.status(403).send('Forbidden');
         }
       }
 
-      if (!fs.existsSync(absolutePath)) {
-        return res.json([]);
-      }
       const outline = await parseOutline(fs.readFileSync(absolutePath, 'utf-8'));
       res.json(outline);
     } catch (error) {
