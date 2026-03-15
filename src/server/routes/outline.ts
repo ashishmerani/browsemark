@@ -27,10 +27,10 @@ export const outlineRouter = (directory: string): Router => {
       } else {
         const decodedPath = decodeURIComponent(filePath);
         const normalizedPath = path.normalize(decodedPath);
-        absolutePath = path.join(directory, normalizedPath);
+        absolutePath = path.resolve(directory, normalizedPath);
+        const resolvedRoot = path.resolve(directory) + path.sep;
 
-        const relative = path.relative(directory, absolutePath);
-        if (relative.startsWith('..') || path.isAbsolute(relative)) {
+        if (!absolutePath.startsWith(resolvedRoot)) {
           logger.error(`🚫 Attempted path traversal on outline: ${absolutePath}`);
           return res.status(403).send('Forbidden');
         }
