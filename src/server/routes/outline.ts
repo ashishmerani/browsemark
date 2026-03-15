@@ -12,12 +12,6 @@ interface OutlineItem {
   id: string;
 }
 
-const getPathPrefix = (rootPath: string): string =>
-  rootPath.endsWith(path.sep) ? rootPath : `${rootPath}${path.sep}`;
-
-const isPathWithinRoot = (targetPath: string, rootPath: string): boolean =>
-  targetPath === rootPath || targetPath.startsWith(getPathPrefix(rootPath));
-
 const isMissingFileError = (error: unknown): boolean =>
   typeof error === 'object' &&
   error !== null &&
@@ -33,40 +27,43 @@ export const outlineRouter = (directory: string): Router => {
       return res.status(400).send('filePath query parameter is required.');
     }
     try {
-      let absolutePath: string;
       if (filePath === 'browsemark-welcome.md') {
-        absolutePath = path.join(__dirname, '../public/welcome.md');
-      } else {
-        const resolvedRoot = fs.realpathSync(directory);
-        const decodedPath = decodeURIComponent(filePath);
-        const normalizedPath = path.normalize(decodedPath);
-        const resolvedPath = path.resolve(resolvedRoot, normalizedPath);
-
-        if (!isPathWithinRoot(resolvedPath, resolvedRoot)) {
-          logger.error(`🚫 Attempted path traversal on outline: ${resolvedPath}`);
-          return res.status(403).send('Forbidden');
-        }
-
-        try {
-          absolutePath = fs.realpathSync(resolvedPath);
-        } catch (error) {
-          if (isMissingFileError(error)) {
-            return res.json([]);
-          }
-          throw error;
-        }
-
-        if (!isPathWithinRoot(absolutePath, resolvedRoot)) {
-          logger.error(`🚫 Attempted path traversal on outline: ${absolutePath}`);
-          return res.status(403).send('Forbidden');
-        }
+        const welcomePath = path.join(__dirname, '../public/welcome.md');
+        const outline = await parseOutline(fs.readFileSync(welcomePath, 'utf-8'));
+        return res.json(outline);
       }
 
-      const outline = await parseOutline(fs.readFileSync(absolutePath, 'utf-8'));
-      res.json(outline);
+      const resolvedRoot = fs.realpathSync(directory);
+      const rootPrefix = resolvedRoot.endsWith(path.sep) ? resolvedRoot : `${resolvedRoot}${path.sep}`;
+      const decodedPath = decodeURIComponent(filePath);
+      const normalizedPath = path.normalize(decodedPath);
+      const resolvedPath = path.resolve(resolvedRoot, normalizedPath);
+
+      if (resolvedPath !== resolvedRoot && !resolvedPath.startsWith(rootPrefix)) {
+        logger.error(`🚫 Attempted path traversal on outline: ${resolvedPath}`);
+        return res.status(403).send('Forbidden');
+      }
+
+      let safePath: string;
+      try {
+        safePath = fs.realpathSync(resolvedPath);
+      } catch (error) {
+        if (isMissingFileError(error)) {
+          return res.json([]);
+        }
+        throw error;
+      }
+
+      if (safePath !== resolvedRoot && !safePath.startsWith(rootPrefix)) {
+        logger.error(`🚫 Attempted path traversal on outline: ${safePath}`);
+        return res.status(403).send('Forbidden');
+      }
+
+      const outline = await parseOutline(fs.readFileSync(safePath, 'utf-8'));
+      return res.json(outline);
     } catch (error) {
       logger.error(`Error getting outline for ${filePath}:`, error);
-      res.status(500).send('Error getting outline.');
+      return res.status(500).send('Error getting outline.');
     }
   });
 
