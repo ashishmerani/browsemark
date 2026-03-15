@@ -96,4 +96,4 @@ tags: ["browsemark", "docs"]
 
 ## Syntax Highlighting
 
-Fenced code blocks are highlighted automatically. Choose from 21 themes in Settings.
+Fenced code blocks are highlighted automatically. Choose from over 40 syntax themes in Settings.

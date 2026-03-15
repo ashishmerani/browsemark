@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import * as fs from 'fs';
 import net from 'net';
 import path from 'path';
@@ -6,7 +7,7 @@ import { startHttpServer } from 'agentation-mcp';
 import { logger } from '../utils/logger';
 import { fileTreeRouter } from './routes/filetree';
 import { outlineRouter } from './routes/outline';
-import { getConfig, saveConfig } from './config';
+import { getConfig, saveConfig, VALID_CONFIG_KEYS } from './config';
 import { setupWatcher } from './watcher';
 import { plantumlRouter } from './routes/plantuml';
 
@@ -48,6 +49,14 @@ export const createApp = (
 ): express.Express => {
   const app = express();
 
+  // Global rate limiter — defense-in-depth for --host 0.0.0.0 exposure
+  app.use(rateLimit({
+    windowMs: 60 * 1000,
+    limit: 200,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  }));
+
   // JSON middleware - must be before routes that need it
   app.use(express.json());
 
@@ -58,13 +67,28 @@ export const createApp = (
   // Define API
   app.use('/api/filetree', fileTreeRouter(directory));
   app.use('/api/outline', outlineRouter(directory));
+  // Stricter rate limit for PlantUML — each request spawns a JVM subprocess
+  app.use('/api/plantuml', rateLimit({
+    windowMs: 60 * 1000,
+    limit: 30,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  }));
   app.use('/api/plantuml', plantumlRouter());
   app.get('/api/config', (req, res) => {
     res.json(getConfig());
   });
   app.post('/api/config', (req, res) => {
     try {
-      saveConfig(req.body);
+      const body = req.body;
+      if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        return res.status(400).send('Invalid config: expected a JSON object');
+      }
+      const hasValidKey = Object.keys(body).some(k => VALID_CONFIG_KEYS.has(k));
+      if (!hasValidKey) {
+        return res.status(400).send('Invalid config: no recognized keys');
+      }
+      saveConfig(body);
       res.status(200).send('Config saved');
     } catch (error) {
       logger.error('Failed to save config:', error);
@@ -104,7 +128,16 @@ export const createApp = (
 
   // Catch-all route to serve index.html for any other requests
   app.get('*splat', async (req, res) => {
-    const filePath = path.join(directory, req.path);
+    const decodedPath = decodeURIComponent(req.path);
+    const normalizedPath = path.normalize(decodedPath);
+    const filePath = path.join(directory, normalizedPath);
+
+    // Security: prevent path traversal before any fs access
+    const relative = path.relative(directory, filePath);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) {
+      return res.status(403).send('Forbidden');
+    }
+
     let isDirectory = false;
     try {
       const stats = fs.statSync(filePath);
@@ -115,20 +148,18 @@ export const createApp = (
 
     if (
       isDirectory ||
-      req.path.toLowerCase().endsWith('.md') ||
-      req.path.toLowerCase().endsWith('.markdown')
+      normalizedPath.toLowerCase().endsWith('.md') ||
+      normalizedPath.toLowerCase().endsWith('.markdown')
     ) {
       return res.sendFile('index.html', { root: path.join(currentLocation, '../frontend') });
     } else {
-      // Security: sendFile with { root } delegates to the `send` library which
-      // normalizes paths and rejects traversal attempts. No additional check needed.
-      return res.sendFile(req.path, { root: directory }, (err) => {
+      return res.sendFile(normalizedPath, { root: directory }, (err) => {
         if (err) {
           if ('code' in err && err.code === 'ENOENT') {
-            logger.error(`🚫 File not found: ${path.join(directory, req.path)}`);
+            logger.error(`🚫 File not found: ${filePath}`);
             res.status(404).send('File not found');
           } else {
-            logger.error(`🚫 Error serving file ${path.join(directory, req.path)}:`, err);
+            logger.error(`🚫 Error serving file ${filePath}:`, err);
             res.status(500).send('Internal Server Error');
           }
         }

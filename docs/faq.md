@@ -34,7 +34,7 @@ Yes. Click the gear icon in the header to open the settings dialog:
 
 - **Layout**: Compact (centered) or full-width content
 - **Color scheme**: 21 application themes with light/dark/auto mode
-- **Syntax highlighting**: Multiple code themes (Atom One Dark, VS Code, GitHub, etc.)
+- **Syntax highlighting**: Multiple code themes (Atom Dark, VS Dark Plus, GHColors, etc.)
 - **Fonts**: Custom font family, size, and monospace font for code blocks
 
 Browser preferences (theme, layout, panel state) are saved to localStorage. Font and theme defaults are also saved to `~/.config/browsemark/config.json`. All settings persist across sessions.

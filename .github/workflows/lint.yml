@@ -8,6 +8,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  version-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Verify root and frontend versions match
+        run: |
+          ROOT=$(node -p "require('./package.json').version")
+          FRONTEND=$(node -p "require('./packages/frontend/package.json').version")
+          if [ "$ROOT" != "$FRONTEND" ]; then
+            echo "::error::Version mismatch: root=$ROOT frontend=$FRONTEND"
+            exit 1
+          fi
+          echo "✓ Versions in sync: $ROOT"
+
   lint:
     runs-on: ubuntu-latest
 

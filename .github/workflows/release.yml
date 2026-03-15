@@ -62,7 +62,8 @@ jobs:
           git config user.name "Ashish Merani"
           git config user.email "ashishmerani@users.noreply.github.com"
           NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
-          git add package.json package-lock.json
+          cd packages/frontend && npm version "$NEW_VERSION" --no-git-tag-version && cd ../..
+          git add package.json package-lock.json packages/frontend/package.json packages/frontend/package-lock.json
           git commit -m "chore: release ${NEW_VERSION}"
           git tag "${NEW_VERSION}"
           git push
