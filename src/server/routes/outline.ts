@@ -22,12 +22,9 @@ export const outlineRouter = (directory: string): Router => {
     }
     try {
       let absolutePath: string;
-      let allowedRoot: string;
       if (filePath === 'browsemark-welcome.md') {
-        allowedRoot = path.join(__dirname, '../public');
-        absolutePath = path.join(allowedRoot, 'welcome.md');
+        absolutePath = path.join(__dirname, '../public/welcome.md');
       } else {
-        allowedRoot = directory;
         const decodedPath = decodeURIComponent(filePath);
         const normalizedPath = path.normalize(decodedPath);
         absolutePath = path.join(directory, normalizedPath);
@@ -38,7 +35,11 @@ export const outlineRouter = (directory: string): Router => {
           return res.status(403).send('Forbidden');
         }
       }
-      const outline = await getMarkdownOutline(absolutePath, allowedRoot);
+
+      if (!fs.existsSync(absolutePath)) {
+        return res.json([]);
+      }
+      const outline = await parseOutline(fs.readFileSync(absolutePath, 'utf-8'));
       res.json(outline);
     } catch (error) {
       logger.error(`Error getting outline for ${filePath}:`, error);
@@ -49,24 +50,11 @@ export const outlineRouter = (directory: string): Router => {
   return router;
 };
 
-const getMarkdownOutline = async (filePath: string, allowedRoot?: string): Promise<OutlineItem[]> => {
-  // Defense-in-depth: validate path is within allowed root even though caller checks too
-  if (allowedRoot) {
-    const relative = path.relative(allowedRoot, filePath);
-    if (relative.startsWith('..') || path.isAbsolute(relative)) {
-      return [];
-    }
-  }
-
-  if (!fs.existsSync(filePath)) {
-    return [];
-  }
-
+const parseOutline = async (fileContent: string): Promise<OutlineItem[]> => {
   const slugger = await import('github-slugger')
     .then(module => module.default)
     .then(GithubSlugger => new GithubSlugger());
 
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
   const tokens = md.parse(fileContent, {});
   const outline: OutlineItem[] = [];
 
