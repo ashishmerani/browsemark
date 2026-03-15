@@ -58,6 +58,13 @@ export const createApp = (
   });
   app.use('/api', apiLimiter);
 
+  const fileAccessLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 200,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  });
+
   // JSON middleware - must be before routes that need it
   app.use(express.json());
 
@@ -128,7 +135,7 @@ export const createApp = (
   app.use('/api/markdown', express.static(directory));
 
   // Catch-all route to serve index.html for any other requests
-  app.get('*splat', async (req, res) => {
+  app.get('*splat', fileAccessLimiter, async (req, res) => {
     const decodedPath = decodeURIComponent(req.path);
     const normalizedPath = path.normalize(decodedPath);
     const filePath = path.join(directory, normalizedPath);
@@ -170,4 +177,3 @@ export const createApp = (
 
   return app;
 };
-

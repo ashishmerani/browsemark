@@ -79,6 +79,10 @@ describe('server.ts unit tests', () => {
   });
 
   describe('createApp', () => {
+    const getCatchAllRouteHandler = () => (app.get as Mock).mock.calls.find(
+      (call: [string, unknown, (req: Request, res: Response) => void]) => call[0] === '*splat' && call.length === 3,
+    )[2];
+
     it('should create an express app', () => {
       expect(app).toBeDefined();
     });
@@ -225,9 +229,7 @@ describe('server.ts unit tests', () => {
       const req = { path: '/etc/passwd' } as Request;
       const res = { status: mockStatus, send: mockSend, sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       // The path resolves inside mount dir, so it's safe — returns 404 not a traversal leak
@@ -272,9 +274,7 @@ describe('server.ts unit tests', () => {
       const req = { path: 'test.md' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -291,9 +291,7 @@ describe('server.ts unit tests', () => {
       const req = { path: '/some/directory' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -312,9 +310,7 @@ describe('server.ts unit tests', () => {
       const req = { path: 'image.png' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -340,9 +336,7 @@ describe('server.ts unit tests', () => {
         sendFile: mockSendFile,
       } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockStatus).toHaveBeenCalledWith(404);
@@ -365,9 +359,7 @@ describe('server.ts unit tests', () => {
         sendFile: mockSendFile,
       } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockStatus).toHaveBeenCalledWith(500);
