@@ -49,13 +49,14 @@ export const createApp = (
 ): express.Express => {
   const app = express();
 
-  // Global rate limiter — defense-in-depth for --host 0.0.0.0 exposure
-  app.use(rateLimit({
+  // Rate limiter scoped to API routes — does not consume budget on static assets
+  const apiLimiter = rateLimit({
     windowMs: 60 * 1000,
     limit: 200,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
-  }));
+  });
+  app.use('/api', apiLimiter);
 
   // JSON middleware - must be before routes that need it
   app.use(express.json());

@@ -44,6 +44,13 @@ jobs:
         working-directory: ./packages/frontend
         run: npm ci
 
+      - name: Bump version (no commit yet)
+        id: version
+        run: |
+          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
+          cd packages/frontend && npm version "$NEW_VERSION" --no-git-tag-version && cd ../..
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Build backend
         run: npm run build
 
@@ -56,19 +63,15 @@ jobs:
       - name: Run frontend tests
         run: npm run test:frontend
 
-      - name: Bump version and push tag
-        id: version
+      - name: Commit version bump and push tag
         run: |
           git config user.name "Ashish Merani"
           git config user.email "ashishmerani@users.noreply.github.com"
-          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
-          cd packages/frontend && npm version "$NEW_VERSION" --no-git-tag-version && cd ../..
           git add package.json package-lock.json packages/frontend/package.json packages/frontend/package-lock.json
-          git commit -m "chore: release ${NEW_VERSION}"
-          git tag "${NEW_VERSION}"
+          git commit -m "chore: release ${{ steps.version.outputs.new_version }}"
+          git tag "${{ steps.version.outputs.new_version }}"
           git push
           git push --tags
-          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
         run: npx npm@11.5.1 publish --ignore-scripts --provenance --access public

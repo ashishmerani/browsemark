@@ -36,8 +36,15 @@ export const getConfig = (): Config => {
     return defaultConfig;
   }
 
-  const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-  return { ...defaultConfig, ...config };
+  const raw = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  // Filter out stray keys — only allowlisted properties are returned
+  const filtered: Record<string, unknown> = {};
+  for (const key of Object.keys(raw)) {
+    if (VALID_CONFIG_KEYS.has(key)) {
+      filtered[key] = raw[key];
+    }
+  }
+  return { ...defaultConfig, ...filtered } as Config;
 };
 
 export const saveConfig = (newConfig: Partial<Config>): void => {
