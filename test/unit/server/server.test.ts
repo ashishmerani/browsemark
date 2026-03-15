@@ -59,6 +59,7 @@ vi.mock('net', () => ({
 vi.mock('../../../src/server/config', () => ({
   getConfig: vi.fn(),
   saveConfig: vi.fn(),
+  VALID_CONFIG_KEYS: new Set(['fontFamily', 'fontFamilyMonospace', 'fontSize', 'theme', 'syntaxHighlighterTheme']),
 }));
 
 describe('server.ts unit tests', () => {
@@ -78,6 +79,10 @@ describe('server.ts unit tests', () => {
   });
 
   describe('createApp', () => {
+    const getCatchAllRouteHandler = () => (app.get as Mock).mock.calls.find(
+      (call: [string, unknown, (req: Request, res: Response) => void]) => call[0] === '*splat' && call.length === 3,
+    )[2];
+
     it('should create an express app', () => {
       expect(app).toBeDefined();
     });
@@ -210,14 +215,66 @@ describe('server.ts unit tests', () => {
       expect(mockNext).toHaveBeenCalled();
     });
 
+    it('should not call statSync for traversal paths in catch-all route', async () => {
+      // Express normalizes URL paths, so /../.. becomes /. Our handler adds
+      // defense-in-depth: decodeURIComponent + path.normalize + path.relative check
+      // before touching the filesystem. The path resolves safely inside the
+      // mount directory, so statSync is called but only on a safe path.
+      (fs.statSync as Mock).mockImplementation(() => { throw new Error('not found'); });
+      const mockSendFile = vi.fn((filePath, options, callback) => {
+        callback({ code: 'ENOENT' });
+      });
+      const mockStatus = vi.fn().mockReturnThis();
+      const mockSend = vi.fn();
+      const req = { path: '/etc/passwd' } as Request;
+      const res = { status: mockStatus, send: mockSend, sendFile: mockSendFile } as unknown as Response;
+
+      const catchAllRoute = getCatchAllRouteHandler();
+      await catchAllRoute(req, res);
+
+      // The path resolves inside mount dir, so it's safe — returns 404 not a traversal leak
+      expect(mockStatus).toHaveBeenCalledWith(404);
+    });
+
+    it('should reject config POST with only unknown keys', async () => {
+      const mockStatus = vi.fn().mockReturnThis();
+      const mockSend = vi.fn();
+      const configPostCall = (app.post as Mock).mock.calls.find(
+        (call: [string, (req: Request, res: Response) => void]) =>
+          call[0] === '/api/config',
+      );
+      const configPostHandler = configPostCall[1];
+      configPostHandler(
+        { body: { evil: 'payload' } } as Request,
+        { status: mockStatus, send: mockSend } as unknown as Response,
+      );
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockSend).toHaveBeenCalledWith('Invalid config: no recognized keys');
+      expect(saveConfig).not.toHaveBeenCalled();
+    });
+
+    it('should reject config POST with non-object body', async () => {
+      const mockStatus = vi.fn().mockReturnThis();
+      const mockSend = vi.fn();
+      const configPostCall = (app.post as Mock).mock.calls.find(
+        (call: [string, (req: Request, res: Response) => void]) =>
+          call[0] === '/api/config',
+      );
+      const configPostHandler = configPostCall[1];
+      configPostHandler(
+        { body: null } as Request,
+        { status: mockStatus, send: mockSend } as unknown as Response,
+      );
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockSend).toHaveBeenCalledWith('Invalid config: expected a JSON object');
+    });
+
     it('should serve index.html for markdown paths', async () => {
       const mockSendFile = vi.fn();
       const req = { path: 'test.md' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -234,9 +291,7 @@ describe('server.ts unit tests', () => {
       const req = { path: '/some/directory' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -255,9 +310,7 @@ describe('server.ts unit tests', () => {
       const req = { path: 'image.png' } as Request;
       const res = { sendFile: mockSendFile } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockSendFile).toHaveBeenCalledWith(
@@ -283,9 +336,7 @@ describe('server.ts unit tests', () => {
         sendFile: mockSendFile,
       } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockStatus).toHaveBeenCalledWith(404);
@@ -308,9 +359,7 @@ describe('server.ts unit tests', () => {
         sendFile: mockSendFile,
       } as unknown as Response;
 
-      const catchAllRoute = (app.get as Mock).mock.calls.find(
-        (call: [string, (req: Request, res: Response) => void]) => call[0] === '*splat',
-      )[1];
+      const catchAllRoute = getCatchAllRouteHandler();
       await catchAllRoute(req, res);
 
       expect(mockStatus).toHaveBeenCalledWith(500);

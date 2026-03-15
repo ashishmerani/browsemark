@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { getConfig, saveConfig } from '../../../src/server/config';
+import { getConfig, saveConfig, VALID_CONFIG_KEYS } from '../../../src/server/config';
 
 describe('config', () => {
   const originalFsReadFile = fs.readFileSync;
@@ -104,5 +104,22 @@ describe('config', () => {
       theme: 'default',
       syntaxHighlighterTheme: 'auto',
     }, null, 2));
+  });
+
+  it('saveConfig should strip unknown keys from input', () => {
+    (fs.existsSync as Mock).mockReturnValue(false);
+
+    saveConfig({ fontFamily: 'Valid', malicious: 'payload', __proto__: 'bad' } as never);
+
+    const writtenConfig = JSON.parse((fs.writeFileSync as Mock).mock.calls[0][1]);
+    expect(writtenConfig).not.toHaveProperty('malicious');
+    expect(writtenConfig).not.toHaveProperty('__proto__');
+    expect(writtenConfig.fontFamily).toBe('Valid');
+  });
+
+  it('VALID_CONFIG_KEYS should contain exactly the Config interface keys', () => {
+    expect(VALID_CONFIG_KEYS).toEqual(new Set([
+      'fontFamily', 'fontFamilyMonospace', 'fontSize', 'theme', 'syntaxHighlighterTheme',
+    ]));
   });
 });

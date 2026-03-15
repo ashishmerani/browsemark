@@ -112,4 +112,59 @@ describe('Server E2E Tests', () => {
       expect(res.text).toEqual('File not found');
     });
   });
+
+  describe('security: catch-all path traversal (#33)', () => {
+    it('should not leak directory info for traversal paths (Express normalizes URL)', async () => {
+      // Express normalizes /../../../etc/passwd → /etc/passwd before handler.
+      // Our path.join safely resolves it inside the mount directory → 404.
+      const res = await request(app).get('/../../../etc/passwd');
+      expect(res.statusCode).toEqual(404);
+    });
+
+    it('should not leak info for encoded traversal paths', async () => {
+      const res = await request(app).get('/%2e%2e/%2e%2e/etc/passwd');
+      expect(res.statusCode).toEqual(404);
+    });
+  });
+
+  describe('security: config key allowlist (#36)', () => {
+    it('should accept valid config keys', async () => {
+      const res = await request(app)
+        .post('/api/config')
+        .send({ fontFamily: 'Arial', fontSize: 14 });
+      expect(res.statusCode).toEqual(200);
+      expect(res.text).toEqual('Config saved');
+    });
+
+    it('should reject request with only unknown keys', async () => {
+      const res = await request(app)
+        .post('/api/config')
+        .send({ malicious: 'payload', __proto__: 'bad' });
+      expect(res.statusCode).toEqual(400);
+      expect(res.text).toEqual('Invalid config: no recognized keys');
+    });
+
+    it('should reject non-object body', async () => {
+      const res = await request(app)
+        .post('/api/config')
+        .send('not json')
+        .set('Content-Type', 'application/json');
+      expect(res.statusCode).toEqual(400);
+    });
+
+    it('should accept mixed valid and unknown keys (unknown stripped by saveConfig)', async () => {
+      const res = await request(app)
+        .post('/api/config')
+        .send({ fontFamily: 'Helvetica', evil: 'value' });
+      expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe('security: outline path traversal defense-in-depth (#34)', () => {
+    it('should return 403 for deeply nested traversal on outline', async () => {
+      const res = await request(app).get('/api/outline?filePath=../../../etc/shadow');
+      expect(res.statusCode).toEqual(403);
+      expect(res.text).toEqual('Forbidden');
+    });
+  });
 });

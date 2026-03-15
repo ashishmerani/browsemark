@@ -22,9 +22,12 @@ export const outlineRouter = (directory: string): Router => {
     }
     try {
       let absolutePath: string;
+      let allowedRoot: string;
       if (filePath === 'browsemark-welcome.md') {
-        absolutePath = path.join(__dirname, '../public/welcome.md');
+        allowedRoot = path.join(__dirname, '../public');
+        absolutePath = path.join(allowedRoot, 'welcome.md');
       } else {
+        allowedRoot = directory;
         const decodedPath = decodeURIComponent(filePath);
         const normalizedPath = path.normalize(decodedPath);
         absolutePath = path.join(directory, normalizedPath);
@@ -35,7 +38,7 @@ export const outlineRouter = (directory: string): Router => {
           return res.status(403).send('Forbidden');
         }
       }
-      const outline = await getMarkdownOutline(absolutePath);
+      const outline = await getMarkdownOutline(absolutePath, allowedRoot);
       res.json(outline);
     } catch (error) {
       logger.error(`Error getting outline for ${filePath}:`, error);
@@ -46,7 +49,15 @@ export const outlineRouter = (directory: string): Router => {
   return router;
 };
 
-const getMarkdownOutline = async (filePath: string): Promise<OutlineItem[]> => {
+const getMarkdownOutline = async (filePath: string, allowedRoot?: string): Promise<OutlineItem[]> => {
+  // Defense-in-depth: validate path is within allowed root even though caller checks too
+  if (allowedRoot) {
+    const relative = path.relative(allowedRoot, filePath);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) {
+      return [];
+    }
+  }
+
   if (!fs.existsSync(filePath)) {
     return [];
   }
